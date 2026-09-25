@@ -1,0 +1,35 @@
+name: Cypress E2E
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - name: Ejecutar aplicación y recorridos
+        uses: cypress-io/github-action@v6
+        with:
+          install: false
+          start: npm start
+          wait-on: 'http://127.0.0.1:3000/api/products'
+          command: npm run test:e2e
+        env:
+          ENABLE_TEST_RESET: '1'
+          DATA_FILE: '${{ runner.temp }}/cafeteria-ci.json'
+      - name: Guardar evidencias de Cypress
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: evidencias-cypress
+          path: |
+            cypress/screenshots
+            cypress/videos
+          if-no-files-found: ignore

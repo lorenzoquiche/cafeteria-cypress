@@ -1,0 +1,19 @@
+{
+  "name": "cafeteria-cypress",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "start": "node server/index.js",
+    "test:e2e": "cypress run",
+    "test:e2e:open": "cypress open"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.2",
+    "cypress": "^15.0.0",
+    "typescript": "^5.9.0"
+  },
+  "engines": {
+    "node": ">=24"
+  }
+}
