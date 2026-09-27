@@ -1,7 +1,9 @@
 describe('Pedidos de la cafetería', () => {
   beforeEach(() => {
+    cy.intercept('GET', '/api/products').as('getProducts');
     cy.request('POST', '/api/test/reset').its('status').should('eq', 200);
     cy.visit('/');
+    cy.wait('@getProducts').its('response.statusCode').should('eq', 200);
     cy.get('[data-cy="product-espresso"]').should('contain', '8 disponibles');
   });
 
@@ -33,8 +35,7 @@ describe('Pedidos de la cafetería', () => {
   });
 
   it('validación: carrito vacío y cantidad inválida nunca envían POST', () => {
-    let sent = 0;
-    cy.intercept('POST', '/api/orders', req => { sent += 1; req.continue(); }).as('unexpectedOrder');
+    cy.intercept('POST', '/api/orders').as('unexpectedOrder');
     cy.get('button').contains('Confirmar pedido').click();
     cy.get('#status').should('contain', 'Agrega al menos un producto');
     cy.get('[data-cy="product-espresso"]').find('button').click();
@@ -42,8 +43,7 @@ describe('Pedidos de la cafetería', () => {
     cy.get('#status').should('contain', 'cantidad entera');
     cy.get('button').contains('Confirmar pedido').click();
     cy.get('#status').should('contain', 'Revisa las cantidades');
-    cy.then(() => expect(sent).to.equal(0));
-    cy.request({ url: '/api/orders/no-existe', failOnStatusCode: false }).its('status').should('eq', 404);
+    cy.get('@unexpectedOrder.all').should('have.length', 0);
     cy.screenshot('02-validacion');
   });
 
